@@ -7,6 +7,7 @@ import Header from '../../components/Header';
 import { LoginForm } from '../../components/login-form';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../features/auth/AuthContext";
+import { Button } from '../../components/ui/button';
 
 const STORAGE_KEY = 'patientStatusBoardData';
 
@@ -86,12 +87,14 @@ const PatientStatusPage: React.FC = () => {
           <div className="flex items-start gap-8 max-w-5xl mx-auto mt-8 mb-2">
             <div className="flex-1">
               <h1 className="text-2xl font-bold mb-2">Welcome Surgery Team</h1>
-              <button
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition mb-4"
+              <Button
+                variant="secondary"
+                className="mb-4 flex items-center gap-2"
                 onClick={() => navigate('/')}
               >
+                <img src="/home.png" alt="Home" className="h-5 w-5" />
                 Home
-              </button>
+              </Button>
               <PatientStatusForm
                 onSubmit={handlePatientSubmit}
                 existingPatient={undefined}
