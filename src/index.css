@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap');
+
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -167,22 +170,118 @@
 }
 
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap');
-
-  * {
-  font-family: "Inter", sans-serif;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.chatbot-popup {
+  position: fixed;
+  bottom: 90px;
+  right: 35px;
+  width: 300px;        /* Reduced width */
+  height: 450px;       /* Reduced height */
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  transform: scale(0.2);
+  transform-origin: bottom right;
+  transition: all 0.1s ease;
+  box-shadow: 0 0 128px rgba(0, 0, 0, 0.1), 0 32px 64px -48px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
 }
 
-body {
-  background-color: red;
-  width: 100%;
-  min-height: 100vh;
+.chatbot-popup.show {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
 }
 
-/* =============== Chatbot Toggle Button =============== */
+.chat-header {
+  background-color: #6c63ff;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.chat-body {
+  padding: 15px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #ddd3f9 transparent;
+}
+
+.chat-message {
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+.chat-message.user {
+  align-self: flex-end;
+  background-color: #e0e0e0;
+}
+
+.chat-message.model {
+  align-self: flex-start;
+  background-color: #f0f0ff;
+}
+
+.chat-form {
+  display: flex;
+  padding: 12px;
+  border-top: 1px solid #ddd;
+  gap: 8px;
+}
+
+.message-input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.send-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #6c63ff;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#chatbot-toggler {
+  position: fixed;
+  bottom: 30px;
+  right: 35px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #6c63ff;
+  color: white;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+  z-index: 10000;
+}
+
+/* Responsive layout for small screens */
+@media screen and (max-width: 520px) {
+  .chatbot-popup {
+    width: 90vw;
+    height: 80vh;
+    right: 20px;
+    bottom: 100px;
+  }
+}
+
+
 #chatbot-toggler {
   position: fixed;
   bottom: 30px;
@@ -400,4 +499,4 @@ body {
     right: 20px;
     bottom: 20px;
   }
-}
+} 
