@@ -1,10 +1,8 @@
-import './App.css';
 import ChatbotIcon from '@/components/ChatbotIcon';
 import Chatform from '@/components/Chatform';
 import ChatMessage from '@/components/ChatMessage';
 import { useRef, useState, useEffect } from 'react';
-import { companyInfo } from '@/components/companyInfo';
-
+import { hospitalInfo } from '@/components/hosptalInfo';
 type ChatMessageType = {
   role: 'user' | 'model';
   text: string;
@@ -16,7 +14,7 @@ function Chatbot() {
   const [chatHistory, setchatHistory] = useState<ChatMessageType[]>([
     {
       role: 'model',
-      text: companyInfo,
+      text: hospitalInfo,
       hideInChat: true,
     },
   ]);
@@ -76,8 +74,10 @@ function Chatbot() {
   return (
     <div className={`container ${showChatbot ? 'show-chatbot' : ''}`}>
       <button id='chatbot-toggler' onClick={() => setshowChatbot((prev) => !prev)}>
-        <span className='material-symbols-outlined'>mode_comment</span>
-        <span className='material-symbols-outlined'>close</span>
+        {/* <span className='material-symbols-outlined'>mode_comment</span>
+        <span className='material-symbols-outlined'>close</span> */}
+         {/* <span>💬</span> */}
+        <span>❌</span>
       </button>
 
       <div className='chatbot-popup'>
@@ -91,7 +91,8 @@ function Chatbot() {
             onClick={() => setshowChatbot((prev) => !prev)}
             className='material-symbols-outlined'
           >
-            keyboard_arrow_down
+            {/* keyboard_arrow_down */}
+            💬
           </button>
         </div>
 
