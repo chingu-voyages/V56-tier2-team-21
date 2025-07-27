@@ -6,9 +6,7 @@ import PrivateRoute from './features/auth/PrivateRoute'
 import PatientStatusBoard from './features/patientStatus/PatientStatusBoard'
 import Container from './features/container/Container'
 import PatientStatusPage from './features/patientStatus/PatientStatusPage'
-import Chatbot from './features/chat/components/chatbot'
-// ✅ Import your chatbot
-
+import Chatbot from './features/chat/components/Chatbot'
 function App() {
   const AdminPage = () => <div>Admin Page (Protected)</div>;
   const GuestPage = () => <div>Guest Page (Protected)</div>;
