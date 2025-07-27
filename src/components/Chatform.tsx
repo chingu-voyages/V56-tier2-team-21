@@ -49,7 +49,7 @@ const Chatform: React.FC<ChatformProps> = ({ setchatHistory, generateBotResponse
         className="message-input"
       />
       <button type="submit" className="material-symbols-outlined">
-        arrow_upward
+        👆
       </button>
     </form>
   );
