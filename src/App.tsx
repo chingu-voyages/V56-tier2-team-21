@@ -6,6 +6,8 @@ import PrivateRoute from './features/auth/PrivateRoute'
 import PatientStatusBoard from './features/patientStatus/PatientStatusBoard'
 import Container from './features/container/Container'
 import PatientStatusPage from './features/patientStatus/PatientStatusPage'
+import Chatbot from './features/chat/components/chatbot'
+// ✅ Import your chatbot
 
 function App() {
   const AdminPage = () => <div>Admin Page (Protected)</div>;
@@ -37,6 +39,7 @@ function App() {
           <Route path="/surgery-team" element={<PatientStatusPage />} />
         </Routes>
         <Footer />
+         <Chatbot />
       </Router>
     </AuthProvider>
   );
