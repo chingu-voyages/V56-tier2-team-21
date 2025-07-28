@@ -167,10 +167,10 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({ isGuest, patien
     : patients;
 
   return (
-    <div className={`${isGuest ? 'fixed inset-0 bg-white' : 'max-w-2xl mx-auto mt-8 p-4 bg-white rounded-xl shadow-md mb-24'}`}>
+    <div className={`${isGuest ? 'fixed inset-0 bg-white' : 'mx-auto mt-8 p-4 bg-white rounded-xl mb-24'}`}>
       {currentPath !== 'surgery-team' && <div className='mb-10'><Header /></div>}
       <div className={`${isGuest ? 'h-full flex flex-col' : ''}`}>
-        <div>
+        <div className='mb-10'>
           {!isGuest && !propPatients && (
             <button
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
@@ -180,7 +180,7 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({ isGuest, patien
             </button>
           )}
         </div>
-        <div className="mb-2 text-sm text-gray-500 px-5">Latest updated at {lastUpdated}</div>
+        <div className="mb-2 text-sm text-gray-500">Latest updated at {lastUpdated}</div>
         <div
           className={`${isGuest ? 'flex-1 overflow-hidden p-6' : 'overflow-x-auto max-h-80'}`}
           ref={isGuest ? scrollRef : undefined}

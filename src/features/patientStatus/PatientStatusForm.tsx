@@ -54,13 +54,13 @@ const PatientStatusForm: React.FC<PatientStatusFormProps> = ({ onSubmit, existin
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-4 p-4 bg-white rounded-xl shadow">
-      <h2 className="text-lg font-bold mb-4">{existingPatient ? 'Update' : 'Add'} Patient Status</h2>
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 bg-white rounded-xl">
+      {/* <h2 className="text-lg font-bold mb-4">{existingPatient ? 'Update' : 'Add'} Patient Status</h2> */}
       {addError ? (
         <div className="mb-3 text-red-600 font-semibold">{addError}</div>
       ) : (
         <>
-          <div className="mb-3">
+          {/* <div className="mb-3">
             <label className="block mb-1">Patient Name</label>
             <input
               type="text"
@@ -82,9 +82,10 @@ const PatientStatusForm: React.FC<PatientStatusFormProps> = ({ onSubmit, existin
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
-          </div>
+          </div> */}
           <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-            {existingPatient ? 'Update' : 'Add'}
+            {/* {existingPatient ? 'Update' : 'Add'} */}
+            Add
           </button>
         </>
       )}

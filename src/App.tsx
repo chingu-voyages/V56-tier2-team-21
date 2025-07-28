@@ -35,7 +35,7 @@ function App() {
             }
           />
           <Route path="/status" element={<PatientStatusBoard isGuest={true} />} />
-          {/* <Route path="/surgery-team" element={<PatientStatusPage />} /> */}
+          <Route path="/surgery-team1" element={<PatientStatusPage />} />
           <Route path="/surgery-team" element={<Dashboard />} />
         </Routes>
         <Footer />

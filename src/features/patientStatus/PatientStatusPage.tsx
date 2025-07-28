@@ -83,51 +83,45 @@ const PatientStatusPage: React.FC = () => {
         <LoginForm />
       ) : (
         <>
-          <div className="flex items-start gap-8 max-w-5xl mx-auto mt-8 mb-2">
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold mb-2">Welcome Surgery Team</h1>
-              <button
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition mb-4"
-                onClick={() => navigate('/')}
-              >
-                Home
-              </button>
-              <PatientStatusForm
-                onSubmit={handlePatientSubmit}
-                existingPatient={undefined}
-                addError={addError}
-              />
+          <div className="">
+            <div className='w-full'>
+              <div className='flex items-center justify-center'>
+                <PatientStatusForm
+                  onSubmit={handlePatientSubmit}
+                  existingPatient={undefined}
+                  addError={addError}
+                />
+                <form onSubmit={handleSearch} className="p-4 bg-white rounded-xl mb-4">
+                  <div className="mb-3 flex gap-8">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                      placeholder="Enter patient number or name"
+                    />
+                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Search</button>
+                  </div>
+                </form>
+                {/* Search Results */}
+                {searchResults && (
+                  <div className="bg-white rounded-xl shadow p-4">
+                    <h3 className="text-md font-semibold mb-2">Search Results</h3>
+                    {searchResults.length === 0 ? (
+                      <div className="text-red-500">Result not found</div>
+                    ) : (
+                      <PatientStatusBoard isGuest={false} patients={searchResults} />
+                    )}
+                  </div>
+                )}
+              </div>
+              {/* Main Patient Board */}
+              <PatientStatusBoard isGuest={false} />
+
             </div>
-            <div className="w-80">
-              <form onSubmit={handleSearch} className="p-4 bg-white rounded-xl shadow mb-4">
-                <h2 className="text-lg font-bold mb-4">Search Patient</h2>
-                <div className="mb-3">
-                  <label className="block mb-1">Search by Patient Number or Name</label>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full px-3 py-2 border rounded"
-                    placeholder="Enter patient number or name"
-                  />
-                </div>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Search</button>
-              </form>
-              {/* Search Results */}
-              {searchResults && (
-                <div className="bg-white rounded-xl shadow p-4">
-                  <h3 className="text-md font-semibold mb-2">Search Results</h3>
-                  {searchResults.length === 0 ? (
-                    <div className="text-red-500">Result not found</div>
-                  ) : (
-                    <PatientStatusBoard isGuest={false} patients={searchResults} />
-                  )}
-                </div>
-              )}
-            </div>
+
           </div>
-          {/* Main Patient Board */}
-          <PatientStatusBoard isGuest={false} />
+
           {/* Edit Modal */}
           {editingPatient && (
             <PatientStatusModal
