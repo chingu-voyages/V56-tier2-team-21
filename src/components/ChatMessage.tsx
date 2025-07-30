@@ -16,14 +16,27 @@ const ChatMessage: FC<ChatMessageProps> = ({ chat }) => {
   if (chat.hideInChat) return null;
 
   return (
+    
     <div
-      className={`message ${chat.role === "model" ? "bot" : "user"}-message ${
-        chat.isError ? "error" : ""
-      }`}
-    >
-      {chat.role === "model" && <ChatbotIcon />}
-      <p className="message-text">{chat.text}</p>
-    </div>
+  className={`flex items-start gap-2 mb-2 ${
+    chat.role === 'model' ? 'justify-start' : 'justify-end'
+  }`}
+>
+  {chat.role === 'model' && <ChatbotIcon />}
+
+  <div
+    className={`max-w-[80%] px-4 py-2 rounded-lg text-sm shadow ${
+      chat.role === 'model'
+        ? chat.isError
+          ? 'bg-red-100 text-red-800'
+          : 'bg-white text-gray-800'
+        : 'bg-blue-600 text-white'
+    }`}
+  >
+    <p className="whitespace-pre-wrap break-words">{chat.text}</p>
+  </div>
+</div>
+
   );
 };
 
