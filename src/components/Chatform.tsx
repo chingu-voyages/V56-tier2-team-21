@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import type { FormEvent } from "react";
+import { SendHorizonal } from 'lucide-react';
 
 interface ChatMessage {
   role: "user" | "model";
@@ -40,18 +41,23 @@ const Chatform: React.FC<ChatformProps> = ({ setchatHistory, generateBotResponse
   };
 
   return (
-    <form className="chat-form" onSubmit={handleFormSubmit}>
-      <input
-        ref={inputRef}
-        type="text"
-        placeholder="Message..."
-        required
-        className="message-input"
-      />
-      <button type="submit" className="material-symbols-outlined">
-        👆
-      </button>
-    </form>
+ 
+    <form onSubmit={handleFormSubmit} className="flex items-center gap-2 w-full">
+  <input
+    ref={inputRef}
+    type="text"
+    placeholder="Message..."
+    required
+    className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+  />
+  <button
+    type="submit"
+    className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition duration-300"
+    aria-label="Send message"
+  >
+    <SendHorizonal className="w-5 h-5" />
+  </button>
+</form>
   );
 };
 
