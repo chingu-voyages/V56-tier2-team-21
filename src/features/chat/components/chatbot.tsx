@@ -75,12 +75,12 @@ function Chatbot() {
 
   return (
    
-    <div className={`fixed bottom-4 right-4 z-50 ${showChatbot ? '' : ''}`}>
+    <div className={`fixed bottom-4 right-9 z-50 ${showChatbot ? '' : ''}`}>
   {/* Toggle Button */}
   <button
-    id="chatbot-toggler"
+ 
     onClick={() => setshowChatbot((prev) => !prev)}
-    className="bg-blue-500 hover:bg-blue-600 rounded-full p-3 shadow-md"
+    className="bg-white hover:bg-violet-400 rounded-full p-3 shadow-md"
   >
     <img src="bot.png" alt="Chatbot" className="w-8 h-8" />
   </button>
@@ -89,10 +89,9 @@ function Chatbot() {
   <div className={`mt-4 bg-white shadow-lg rounded-xl flex flex-col w-[350px] max-h-[80vh] ${showChatbot ? 'block' : 'hidden'}`}>
     
     {/* Header */}
-    <div className="bg-blue-500 text-white flex items-center justify-between px-4 py-3 rounded-t-xl">
+    <div className="bg-violet-900 text-white flex items-center justify-between px-2 py-1 rounded-t-xl">
       <div className="flex items-center gap-2">
         <ChatbotIcon />
-        {/* <h2 className="text-lg font-semibold">Chatbot</h2> */}
       </div>
       <button onClick={() => setshowChatbot(false)} className="text-white text-4xl">×</button>
     </div>
