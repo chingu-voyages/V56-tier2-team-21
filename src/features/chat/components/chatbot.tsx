@@ -3,6 +3,8 @@ import Chatform from '@/components/Chatform';
 import ChatMessage from '@/components/ChatMessage';
 import { useRef, useState, useEffect } from 'react';
 import { hospitalInfo } from '@/components/hosptalInfo';
+// import { MessageCircle } from 'lucide-react';
+
 type ChatMessageType = {
   role: 'user' | 'model';
   text: string;
@@ -72,54 +74,58 @@ function Chatbot() {
   }, [chatHistory]);
 
   return (
-    <div className={`container ${showChatbot ? 'show-chatbot' : ''}`}>
-      <button id='chatbot-toggler' onClick={() => setshowChatbot((prev) => !prev)}>
-        {/* <span className='material-symbols-outlined'>mode_comment</span>
-        <span className='material-symbols-outlined'>close</span> */}
-         {/* <span>💬</span> */}
-        <span>❌</span>
-      </button>
+   
+    <div className={`fixed bottom-4 right-4 z-50 ${showChatbot ? '' : ''}`}>
+  {/* Toggle Button */}
+  <button
+    id="chatbot-toggler"
+    onClick={() => setshowChatbot((prev) => !prev)}
+    className="bg-blue-500 hover:bg-blue-600 rounded-full p-3 shadow-md"
+  >
+    <img src="bot.png" alt="Chatbot" className="w-8 h-8" />
+  </button>
 
-      <div className='chatbot-popup'>
-        {/* chatbot header */}
-        <div className='chat-header'>
-          <div className='header-info'>
-            <ChatbotIcon />
-            <h2 className='logo-text'>Chatbot</h2>
-          </div>
-          <button
-            onClick={() => setshowChatbot((prev) => !prev)}
-            className='material-symbols-outlined'
-          >
-            {/* keyboard_arrow_down */}
-            💬
-          </button>
-        </div>
-
-        {/* chatbot body */}
-        <div ref={chatBodyRef} className='chat-body'>
-          <div className='message bot-message'>
-            <ChatbotIcon />
-            <p className='message-text'>
-              Hey there <br />
-              How can I help you today?
-            </p>
-          </div>
-          {chatHistory.map((chat, index) => (
-            <ChatMessage key={index} chat={chat} />
-          ))}
-        </div>
-
-        {/* chatbot footer */}
-        <div className='chat-footer'>
-          <Chatform
-            chatHistory={chatHistory}
-            setchatHistory={setchatHistory}
-            generateBotResponse={generateBotResponse}
-          />
-        </div>
+  {/* Chatbot Popup */}
+  <div className={`mt-4 bg-white shadow-lg rounded-xl flex flex-col w-[350px] max-h-[80vh] ${showChatbot ? 'block' : 'hidden'}`}>
+    
+    {/* Header */}
+    <div className="bg-blue-500 text-white flex items-center justify-between px-4 py-3 rounded-t-xl">
+      <div className="flex items-center gap-2">
+        <ChatbotIcon />
+        {/* <h2 className="text-lg font-semibold">Chatbot</h2> */}
       </div>
+      <button onClick={() => setshowChatbot(false)} className="text-white text-4xl">×</button>
     </div>
+
+    {/* Chat Body */}
+    <div
+      ref={chatBodyRef}
+      className="flex-1 overflow-y-auto px-4 py-2 bg-gray-100 space-y-2 scroll-smooth"
+    >
+      <div className="flex items-start gap-2">
+        <ChatbotIcon />
+        <p className="bg-white p-3 rounded-lg shadow text-sm text-gray-800">
+          Hey there 👋<br />
+          How can I help you today?
+        </p>
+      </div>
+
+      {chatHistory.map((chat, index) => (
+        <ChatMessage key={index} chat={chat} />
+      ))}
+    </div>
+
+    {/* Footer */}
+    <div className="border-t px-4 py-3 bg-white">
+      <Chatform
+        chatHistory={chatHistory}
+        setchatHistory={setchatHistory}
+        generateBotResponse={generateBotResponse}
+      />
+    </div>
+  </div>
+</div>
+
   );
 }
 
