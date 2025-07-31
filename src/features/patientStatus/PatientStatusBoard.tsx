@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../../components/Header';
 import { useLocation } from 'react-router-dom';
+import { Button } from '../../components/ui/button';
 
 // Local storage key
 const STORAGE_KEY = 'patientStatusBoardData';
@@ -172,12 +173,12 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({ isGuest, patien
       <div className={`${isGuest ? 'h-full flex flex-col' : ''}`}>
         <div className='mb-10'>
           {!isGuest && !propPatients && (
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            <Button
+              className="cursor-pointer"
               onClick={handleRefresh}
             >
               Refresh
-            </button>
+            </Button>
           )}
         </div>
         <div className="mb-2 text-sm text-gray-500">Latest updated at {lastUpdated}</div>
