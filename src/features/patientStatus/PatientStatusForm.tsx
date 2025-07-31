@@ -18,7 +18,7 @@ interface PatientStatusFormProps {
 
 const statusOptions: PatientStatus[] = ["Checked In", "Pre-Procedure", "In-progress", "Closing", "Recovery", "Complete", "Dismissal"];
 
-const PatientStatusForm: React.FC<PatientStatusFormProps> = ({ onSubmit, existingPatient, onNumberChange, addError }) => {
+const AddPatients: React.FC<PatientStatusFormProps> = ({ onSubmit, existingPatient, onNumberChange, addError }) => {
   // Only use number state for editing
   const [name, setName] = useState(existingPatient?.name || '');
   const [status, setStatus] = useState<PatientStatus>(existingPatient?.status || 'Checked In');
@@ -54,43 +54,10 @@ const PatientStatusForm: React.FC<PatientStatusFormProps> = ({ onSubmit, existin
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 bg-white rounded-xl">
-      {/* <h2 className="text-lg font-bold mb-4">{existingPatient ? 'Update' : 'Add'} Patient Status</h2> */}
-      {addError ? (
-        <div className="mb-3 text-red-600 font-semibold">{addError}</div>
-      ) : (
-        <>
-          {/* <div className="mb-3">
-            <label className="block mb-1">Patient Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
-              disabled={!!existingPatient}
-              required={!existingPatient}
-            />
-          </div>
-          <div className="mb-3">
-            <label className="block mb-1">Status</label>
-            <select
-              value={status}
-              onChange={e => setStatus(e.target.value as PatientStatus)}
-              className="w-full px-3 py-2 border rounded"
-            >
-              {statusOptions.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          </div> */}
-          <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-            {/* {existingPatient ? 'Update' : 'Add'} */}
-            Add
-          </button>
-        </>
-      )}
-    </form>
+    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transitio" onClick={handleSubmit}>
+      Add
+    </button>
   );
 };
 
-export default PatientStatusForm;
+export default AddPatients;
