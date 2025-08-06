@@ -35,8 +35,7 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({
 }) => {
   // const [editingPatient, setEditingPatient] = useState<PatientInfo | null>(null);
   const [allPatients, setAllPatients] = useState<PatientInfo[]>([]);
-
-  const renderedPatients = allPatients ? allPatients : patients
+  const renderedPatients = patients ? patients : allPatients
 
   const handleStatusChange = (patient: PatientInfo, newStatus: PatientStatus) => {
     const updatedPatient = { ...patient, status: newStatus };
