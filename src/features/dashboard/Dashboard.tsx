@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import PatientStatusPage from '../patientStatus/PatientStatusPage'
 
-export default function Dashboard() {
+export default function SurgeryDashboard() {
   return (
     <SidebarProvider>
       <AppSidebar />

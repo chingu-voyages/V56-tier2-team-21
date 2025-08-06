@@ -74,15 +74,11 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({
           <tr className="bg-gray-100">
             <th className="px-4 py-2 text-left">Patient #</th>
             <th className="px-4 py-2 text-left">Name</th>
-            {/* <th className="px-4 py-2 text-left">Last Name</th> */}
-            {/* <th className="px-4 py-2 text-left">Country</th> */}
-            {/* <th className="px-4 py-2 text-left">State/Province/Region</th> */}
-            {/* <th className="px-4 py-2 text-left">City</th> */}
             <th className="px-4 py-2 text-left">Address</th>
             <th className="px-4 py-2 text-left">Telephone</th>
             <th className="px-4 py-2 text-left">Contact Email</th>
             <th className="px-4 py-2 text-left">Status</th>
-            <th className="px-4 py-2 text-left">Actions</th>
+            {/* <th className="px-4 py-2 text-left">Actions</th> */}
           </tr>
         </thead>
         <tbody>
@@ -111,7 +107,7 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({
                   </SelectContent>
                 </Select>
               </td>
-              <td className="px-4 py-2">
+              {/* <td className="px-4 py-2">
                 {!isGuest && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -198,7 +194,7 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({
                     </AlertDialogContent>
                   </AlertDialog>
                 )}
-              </td>
+              </td> */}
             </tr>
           ))}
         </tbody>

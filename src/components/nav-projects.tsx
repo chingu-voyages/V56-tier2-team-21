@@ -20,6 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useLocation } from 'react-router-dom'
 
 export function NavProjects({
   projects,
@@ -36,7 +37,7 @@ export function NavProjects({
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarMenu>
         {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={item.name} className={item.name === 'Patient Status' ? 'bg-gray-300' : ''}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
                 <item.icon />

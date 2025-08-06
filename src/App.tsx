@@ -5,8 +5,7 @@ import { AuthProvider } from './features/auth/AuthContext'
 import PrivateRoute from './features/auth/PrivateRoute'
 import PatientStatusBoard from './features/patientStatus/PatientStatusBoard'
 import Container from './features/container/Container'
-import PatientStatusPage from './features/patientStatus/PatientStatusPage'
-import Dashboard from './features/dashboard/Dashboard'
+import SurgeryDashboard from './features/dashboard/Dashboard'
 
 function App() {
   const AdminPage = () => <div>Admin Page (Protected)</div>;
@@ -35,8 +34,7 @@ function App() {
             }
           />
           <Route path="/status" element={<PatientStatusBoard isGuest={true} />} />
-          <Route path="/surgery-team1" element={<PatientStatusPage />} />
-          <Route path="/surgery-team" element={<Dashboard />} />
+          <Route path="/surgery-team" element={<SurgeryDashboard />} />
         </Routes>
         <Footer />
       </Router>
