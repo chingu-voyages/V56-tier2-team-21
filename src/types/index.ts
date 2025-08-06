@@ -19,3 +19,5 @@ export interface PatientInfo {
   contactEmail: string;
   status: string;
 }
+
+export const STORAGE_KEY = 'patientStatusBoardData';

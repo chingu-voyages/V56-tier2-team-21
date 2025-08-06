@@ -1,18 +1,5 @@
-import React, { useState } from 'react';
-import { Button } from '../../components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from '../../components/ui/alert-dialog';
-import { Input } from '../../components/ui/input';
-import type { PatientInfo, PatientStatus } from '../../types';
+import React, { useEffect, useState } from 'react';
+import { STORAGE_KEY, type PatientInfo, type PatientStatus } from '../../types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 
 interface PatientStatusBoardProps {
@@ -46,27 +33,47 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({
   patients = [],
   onUpdatePatient,
 }) => {
-  const [editingPatient, setEditingPatient] = useState<PatientInfo | null>(null);
+  // const [editingPatient, setEditingPatient] = useState<PatientInfo | null>(null);
+  const [allPatients, setAllPatients] = useState<PatientInfo[]>([]);
+
+  const renderedPatients = allPatients ? allPatients : patients
 
   const handleStatusChange = (patient: PatientInfo, newStatus: PatientStatus) => {
     const updatedPatient = { ...patient, status: newStatus };
     onUpdatePatient && onUpdatePatient(updatedPatient);
   };
 
-  const handleEditSave = () => {
-    if (editingPatient) {
-      // Validate telephone is a number and not NaN
-      const tel = Number(editingPatient.telephone);
-      if (isNaN(tel)) {
-        alert('Telephone must be a valid number');
-        return;
+  // const handleEditSave = () => {
+  //   if (editingPatient) {
+  //     // Validate telephone is a number and not NaN
+  //     const tel = Number(editingPatient.telephone);
+  //     if (isNaN(tel)) {
+  //       alert('Telephone must be a valid number');
+  //       return;
+  //     }
+
+  //     onUpdatePatient && onUpdatePatient({ ...editingPatient, telephone: tel });
+  //     setEditingPatient(null);
+  //   }
+  // };
+
+  // Load patients from localStorage on mount
+  useEffect(() => {
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    console.log('storedData', storedData);
+
+    if (storedData) {
+      try {
+        const patients: PatientInfo[] = JSON.parse(storedData);
+        setAllPatients(patients);
+      } catch (error) {
+        console.error('Failed to parse patient data from localStorage:', error);
+        // Do not overwrite with empty if failed
       }
-
-      onUpdatePatient && onUpdatePatient({ ...editingPatient, telephone: tel });
-      setEditingPatient(null);
     }
-  };
+  }, []);
 
+  console.log('renderedPatients', renderedPatients)
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border">
@@ -82,7 +89,7 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({
           </tr>
         </thead>
         <tbody>
-          {patients.map((patient) => (
+          {renderedPatients.map((patient) => (
             <tr key={patient.id} className="border-b">
               <td className="px-4 py-2 font-mono">{patient.id}</td>
               <td className="px-4 py-2">{patient.firstName} {patient.lastName}</td>

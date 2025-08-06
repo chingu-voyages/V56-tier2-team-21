@@ -14,10 +14,8 @@ import {
   AlertDialogAction
 } from '../../components/ui/alert-dialog'
 import { Input } from '../../components/ui/input';
-import type { PatientInfo } from '../../types';
+import { STORAGE_KEY, type PatientInfo } from '../../types';
 import { Button } from '../../components/ui/button';
-
-const STORAGE_KEY = 'patientStatusBoardData';
 
 const PatientStatusPage: React.FC = () => {
   const { isSurgeryTeam } = useAuth();
@@ -29,12 +27,13 @@ const PatientStatusPage: React.FC = () => {
   // Load patients from localStorage on mount
   useEffect(() => {
     const storedData = localStorage.getItem(STORAGE_KEY);
+    console.log('storedData', storedData)
     if (storedData) {
       try {
         const patients: PatientInfo[] = JSON.parse(storedData);
         setPatientInfo(patients);
       } catch {
-        setPatientInfo([]);
+        console.log('no data found')
       }
     }
   }, []);
