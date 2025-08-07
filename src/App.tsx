@@ -6,6 +6,7 @@ import PrivateRoute from './features/auth/PrivateRoute'
 import PatientStatusBoard from './features/patientStatus/PatientStatusBoard'
 import Container from './features/container/Container'
 import SurgeryDashboard from './features/dashboard/Dashboard'
+import Chatbot from './features/chat/components/chatbot'
 
 function App() {
   const AdminPage = () => <div>Admin Page (Protected)</div>;
@@ -37,6 +38,7 @@ function App() {
           <Route path="/surgery-team" element={<SurgeryDashboard />} />
         </Routes>
         <Footer />
+        <Chatbot />
       </Router>
     </AuthProvider>
   );
