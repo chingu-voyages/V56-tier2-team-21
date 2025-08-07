@@ -1,80 +1,123 @@
-import React, { useState } from 'react';
-import PatientStatusForm from './PatientStatusForm';
-import PatientStatusModal from './PatientStatusModal';
-import type { Patient } from './PatientStatusBoard';
+import React, { useRef, useState, useEffect } from 'react';
 import PatientStatusBoard from './PatientStatusBoard';
-import Header from '../../components/Header';
 import { LoginForm } from '../../components/login-form';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../features/auth/AuthContext";
-
-const STORAGE_KEY = 'patientStatusBoardData';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '../../components/ui/alert-dialog'
+import { Input } from '../../components/ui/input';
+import { STORAGE_KEY, type PatientInfo } from '../../types';
+import { Button } from '../../components/ui/button';
 
 const PatientStatusPage: React.FC = () => {
-  // Remove local loggedIn state
-  // const [loggedIn, setLoggedIn] = useState(false);
   const { isSurgeryTeam } = useAuth();
-  console.log('isSurgeryTeam in PatientStatusPage', isSurgeryTeam);
-  // Add form state (independent)
-  const [addName, setAddName] = useState('');
-  const [addError, setAddError] = useState('');
-  // Search form state (independent)
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Patient[] | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
-  const navigate = useNavigate();
-
-  // Get patients from localStorage
-  const getPatients = (): Patient[] => {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (data) {
+  const [patientInfo, setPatientInfo] = useState<PatientInfo[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<PatientInfo[] | null>(null);
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const currentPath = window.location.pathname;
+  // Load patients from localStorage on mount
+  useEffect(() => {
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    console.log('storedData', storedData)
+    if (storedData) {
       try {
-        return JSON.parse(data);
+        const patients: PatientInfo[] = JSON.parse(storedData);
+        setPatientInfo(patients);
       } catch {
-        return [];
+        console.log('no data found')
       }
     }
-    return [];
-  };
+  }, []);
 
-  // Add patient only (no update)
-  const handlePatientSubmit = (patient: Patient) => {
-    let patients = getPatients();
-    patients.push(patient);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(patients));
-    setAddName('');
-    setAddError('');
-  };
+  // Save patients to localStorage whenever patientInfo changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(patientInfo));
+  }, [patientInfo]);
 
-  // Search by number or name (independent state)
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const patients = getPatients();
-    const query = searchQuery.trim().toLowerCase();
-    let results = patients.filter(p =>
-      p.number === query ||
-      p.name.toLowerCase().includes(query)
-    );
-    setSearchResults(results.length > 0 ? results : []);
-  };
+  // Generate unique ID
+  const generateId = () => Date.now();
 
-  // Open modal for editing
-  const handleEditPatient = (patient: Patient) => {
-    setEditingPatient(patient);
-    setModalOpen(true);
-  };
+  const fields = [
+    'First Name',
+    'Last Name',
+    'Street Address',
+    'City',
+    'State/Province/Region',
+    'Country',
+    'Telephone',
+    'Contact Email'
+  ];
 
-  // Update patient from modal
-  const handleUpdatePatient = (updatedPatient: Patient) => {
-    let patients = getPatients();
-    const idx = patients.findIndex(p => p.id === updatedPatient.id);
-    if (idx > -1) {
-      patients[idx] = { ...patients[idx], ...updatedPatient };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(patients));
+  const handlePatientAdd = () => {
+    const values = fields.reduce((acc, key) => {
+      acc[key] = inputRefs.current[key]?.value.trim() || '';
+      return acc;
+    }, {} as Record<string, string>);
+
+    // Validate required fields (simple example)
+    if (!values['First Name'] || !values['Last Name']) {
+      alert('First Name and Last Name are required');
+      return;
     }
-    setEditingPatient(null);
-    setModalOpen(false);
+
+    const newPatient: PatientInfo = {
+      id: generateId(),
+      firstName: values['First Name'],
+      lastName: values['Last Name'],
+      country: values['Country'],
+      streetAddress: values['Street Address'],
+      city: values['City'],
+      state: values['State/Province/Region'],
+      telephone: parseInt(values['Telephone'], 10) || 0,
+      contactEmail: values['Contact Email'],
+      status: 'Checked In', // default status on add
+    };
+
+    setPatientInfo((prev) => [...prev, newPatient]);
+
+    // Clear inputs after add
+    fields.forEach((field) => {
+      if (inputRefs.current[field]) {
+        inputRefs.current[field]!.value = '';
+      }
+    });
+  };
+
+  const handleSearch = () => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) {
+      setFilteredPatients(null);
+      return;
+    }
+    const results = patientInfo.filter(
+      (p) =>
+        p.id.toString().includes(q) ||
+        p.firstName.toLowerCase().includes(q) ||
+        p.lastName.toLowerCase().includes(q)
+    );
+    setFilteredPatients(results.length > 0 ? results : []);
+  };
+
+  const handleUpdatePatient = (updatedPatient: PatientInfo) => {
+    setPatientInfo((prev) =>
+      prev.map((p) => (p.id === updatedPatient.id ? updatedPatient : p))
+    );
+
+    // If filtering, update filteredPatients too
+    setFilteredPatients((prev) =>
+      prev
+        ? prev.map((p) => (p.id === updatedPatient.id ? updatedPatient : p))
+        : null
+    );
   };
 
   return (
@@ -83,60 +126,59 @@ const PatientStatusPage: React.FC = () => {
         <LoginForm />
       ) : (
         <>
-          <div className="flex items-start gap-8 max-w-5xl mx-auto mt-8 mb-2">
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold mb-2">Welcome Surgery Team</h1>
-              <button
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition mb-4"
-                onClick={() => navigate('/')}
-              >
-                Home
-              </button>
-              <PatientStatusForm
-                onSubmit={handlePatientSubmit}
-                existingPatient={undefined}
-                addError={addError}
-              />
-            </div>
-            <div className="w-80">
-              <form onSubmit={handleSearch} className="p-4 bg-white rounded-xl shadow mb-4">
-                <h2 className="text-lg font-bold mb-4">Search Patient</h2>
-                <div className="mb-3">
-                  <label className="block mb-1">Search by Patient Number or Name</label>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full px-3 py-2 border rounded"
-                    placeholder="Enter patient number or name"
-                  />
-                </div>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Search</button>
-              </form>
-              {/* Search Results */}
-              {searchResults && (
-                <div className="bg-white rounded-xl shadow p-4">
-                  <h3 className="text-md font-semibold mb-2">Search Results</h3>
-                  {searchResults.length === 0 ? (
-                    <div className="text-red-500">Result not found</div>
-                  ) : (
-                    <PatientStatusBoard isGuest={false} patients={searchResults} />
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          {/* Main Patient Board */}
-          <PatientStatusBoard isGuest={false} />
-          {/* Edit Modal */}
-          {editingPatient && (
-            <PatientStatusModal
-              open={modalOpen}
-              onClose={() => { setModalOpen(false); setEditingPatient(null); }}
-              onSubmit={handleUpdatePatient}
-              existingPatient={editingPatient}
+          <div className="flex items-center justify-end mb-6 gap-8">
+            <AlertDialog>
+              {currentPath === '/admin' && <AlertDialogTrigger asChild>
+                <Button>Add Patient</Button>
+              </AlertDialogTrigger>}
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className='mb-5'>Add Patient</AlertDialogTitle>
+                  <AlertDialogDescription asChild>
+                    <div className="flex flex-col gap-4">
+                      {fields.map((field) => (
+                        <div key={field} className="flex gap-4">
+                          <label className="font-semibold flex-1/2">{field}</label>
+                          <Input
+                            ref={(el) => {
+                              inputRefs.current[field] = el;
+                            }}
+                            type={field === 'Telephone' ? 'number' : 'text'}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handlePatientAdd}>
+                    Add
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <Input
+              type="text"
+              placeholder="Search by Patient # or Name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="max-w-xs"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSearch();
+              }}
             />
-          )}
+            <Button onClick={handleSearch}>Search</Button>
+            {filteredPatients && (
+              <Button onClick={() => setFilteredPatients(null)}>Clear</Button>
+            )}
+          </div>
+
+          <PatientStatusBoard
+            patients={filteredPatients ?? patientInfo}
+            onUpdatePatient={handleUpdatePatient}
+          />
         </>
       )}
     </div>
