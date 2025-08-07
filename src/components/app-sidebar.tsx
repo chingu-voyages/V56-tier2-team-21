@@ -15,7 +15,7 @@ import {
 
 const data = {
   user: {
-    name: "Surgery Tema",
+    name: "Surgery Team",
     email: "surgery@hospital.com",
     avatar: "/avatars/shadcn.jpg",
   },
@@ -113,7 +113,7 @@ const data = {
       icon: Home,
     },
     {
-      name: "Patient Status",
+      name: "Patient Status Update",
       url: "#",
       icon: ChartAreaIcon,
     },

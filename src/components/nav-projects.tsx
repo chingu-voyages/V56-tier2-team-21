@@ -37,7 +37,7 @@ export function NavProjects({
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarMenu>
         {projects.map((item) => (
-          <SidebarMenuItem key={item.name} className={item.name === 'Patient Status' ? 'bg-gray-300' : ''}>
+          <SidebarMenuItem key={item.name} className={item.name === 'Patient Status Update' ? 'bg-gray-300' : ''}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
                 <item.icon />

@@ -23,7 +23,7 @@ const PatientStatusPage: React.FC = () => {
   const [patientInfo, setPatientInfo] = useState<PatientInfo[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientInfo[] | null>(null);
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-
+  const currentPath = window.location.pathname;
   // Load patients from localStorage on mount
   useEffect(() => {
     const storedData = localStorage.getItem(STORAGE_KEY);
@@ -128,9 +128,9 @@ const PatientStatusPage: React.FC = () => {
         <>
           <div className="flex items-center justify-end mb-6 gap-8">
             <AlertDialog>
-              <AlertDialogTrigger asChild>
+              {currentPath === '/admin' && <AlertDialogTrigger asChild>
                 <Button>Add Patient</Button>
-              </AlertDialogTrigger>
+              </AlertDialogTrigger>}
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle className='mb-5'>Add Patient</AlertDialogTitle>
