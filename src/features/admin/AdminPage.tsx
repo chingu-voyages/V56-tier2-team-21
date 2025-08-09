@@ -1,11 +1,18 @@
-
-
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface Patient {
   firstName: string;
@@ -56,6 +63,7 @@ const AdminPage: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const storedPatients = localStorage.getItem(STORAGE_KEY);
@@ -82,8 +90,6 @@ const AdminPage: React.FC = () => {
       updated[editIndex] = formData;
       setPatients(updated);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      setEditMode(false);
-      setEditIndex(null);
     } else {
       const newPatient: Patient = {
         ...formData,
@@ -95,6 +101,7 @@ const AdminPage: React.FC = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     }
 
+    // Reset state
     setFormData({
       firstName: "",
       lastName: "",
@@ -107,6 +114,9 @@ const AdminPage: React.FC = () => {
       number: "",
       status: "Checked In",
     });
+    setEditMode(false);
+    setEditIndex(null);
+    setOpen(false);
   };
 
   const handleEditPatient = (index: number) => {
@@ -114,6 +124,7 @@ const AdminPage: React.FC = () => {
     setFormData({ ...selected });
     setEditMode(true);
     setEditIndex(index);
+    setOpen(true);
   };
 
   const handleDeletePatient = (index: number) => {
@@ -121,6 +132,24 @@ const AdminPage: React.FC = () => {
     updated.splice(index, 1);
     setPatients(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  };
+
+  const handleAddPatient = () => {
+    setFormData({
+      firstName: "",
+      lastName: "",
+      street: "",
+      city: "",
+      state: "",
+      country: "",
+      phone: "",
+      email: "",
+      number: "",
+      status: "Checked In",
+    });
+    setEditMode(false);
+    setEditIndex(null);
+    setOpen(true);
   };
 
   const fields: Field[] = [
@@ -137,22 +166,45 @@ const AdminPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-100 py-10 text-center">
       <h1 className="font-bold text-3xl mb-10">Admin Dashboard</h1>
-
       {/* Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-        <div className="flex gap-4">
-          <Button variant="outline" onClick={() => navigate("/")}>🏠 Home</Button>
-          <Button variant="outline" onClick={() => navigate("/admin")}>📋 Patient Info</Button>
-          <Button variant="outline" onClick={() => navigate("/login")}>🔁 Status Update</Button>
+        <div className="flex items-center gap-4">
+          <div
+            className="flex items-center justify-center gap-2 cursor-pointer font-bold"
+            onClick={() => navigate('/')}
+          >
+            <img src="/home.png" className="size-12 ml-4" />
+            <span>HOME</span>
+          </div>
+          <div
+            className="flex items-center justify-center gap-2 cursor-pointer font-bold"
+            onClick={() => navigate("/admin")}
+          >
+            <img src='/patient-info.png' className="size-12 ml-4" />
+            <span>Patient Information</span>
+          </div>
+
+          <div
+            className="flex items-center justify-center gap-2 cursor-pointer font-bold"
+            onClick={() => navigate("/status")}
+          >
+            <img src='/patient-status.png' className="size-12 ml-4" />
+            <span>Patient Status</span>
+          </div>
+
         </div>
       </div>
 
-      {/* Patient Table + Form */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-[2fr_1.3fr] gap-10 items-start">
-        {/* All Patients */}
+      {/* Patient Table */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Card className="shadow-md rounded-2xl">
           <CardContent className="p-6 overflow-x-auto">
-            <h2 className="text-xl font-bold text-blue-700 mb-4">All Patients</h2>
+            <div className='flex justify-between mb-10'>
+              <h2 className="text-2xl font-bold">All Patients</h2>
+              <Button onClick={handleAddPatient} className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
+                Add Patient
+              </Button>
+            </div>
             {patients.length === 0 ? (
               <p className="text-gray-600">No patients found.</p>
             ) : (
@@ -175,12 +227,12 @@ const AdminPage: React.FC = () => {
                       <td className="border px-3 py-2">{p.email}</td>
                       <td className="border px-3 py-2">{p.status}</td>
                       <td className="border px-3 py-2">
-                        <Button onClick={() => handleEditPatient(index)} className="bg-green-600 hover:bg-green-700 text-white">
+                        <Button onClick={() => handleEditPatient(index)} className="bg-green-600 hover:bg-green-700 text-white cursor-pointer">
                           Edit
                         </Button>
                       </td>
                       <td className="border px-3 py-2">
-                        <Button onClick={() => handleDeletePatient(index)} className="bg-red-600 hover:bg-red-700 text-white">
+                        <Button onClick={() => handleDeletePatient(index)} className="bg-red-600 hover:bg-red-700 text-white cursor-pointer">
                           Delete
                         </Button>
                       </td>
@@ -191,57 +243,64 @@ const AdminPage: React.FC = () => {
             )}
           </CardContent>
         </Card>
-
-        {/* Form */}
-        <Card className="shadow-md rounded-2xl self-stretch">
-          <CardContent className="overflow-x-auto h-full flex flex-col">
-            <form onSubmit={handleFormSubmit} className="flex-grow">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {fields.map(({ name, label, type }) => (
-                  <div key={name}>
-                    <Label htmlFor={name} className="mb-2">{label}</Label>
-                    <Input
-                      id={name}
-                      name={name}
-                      type={type || "text"}
-                      value={formData[name]}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                ))}
-
-                {editMode && (
-                  <div className="col-span-1 sm:col-span-2">
-                    <Label>Status</Label>
-                    <select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleChange}
-                      className="w-full border px-3 py-2 rounded"
-                    >
-                      <option value="Checked In">Checked In</option>
-                      <option value="Pre-Procedure">Pre-Procedure</option>
-                      <option value="In-progress">In-progress</option>
-                      <option value="Closing">Closing</option>
-                      <option value="Recovery">Recovery</option>
-                      <option value="Complete">Complete</option>
-                      <option value="Dismissal">Dismissal</option>
-                    </select>
-                  </div>
-                )}
-
-                <div className="col-span-1 sm:col-span-2">
-                  <Button type="submit" className="w-fit bg-blue-600 hover:bg-blue-700 text-white">
-                    {editMode ? "Update Patient" : "Add Patient"}
-                  </Button>
-                </div>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
       </div>
+
+      {/* Form Modal */}
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader className='border-b pb-5'>
+            <AlertDialogTitle>{editMode ? "Edit Patient" : "Add Patient"}</AlertDialogTitle>
+          </AlertDialogHeader>
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {fields.map(({ name, label, type }) => (
+                <div key={name}>
+                  <Label htmlFor={name} className="mb-2">{label}</Label>
+                  <Input
+                    id={name}
+                    name={name}
+                    type={type || "text"}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              ))}
+
+              {editMode && (
+                <div className="col-span-1 sm:col-span-2">
+                  <Label>Status</Label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full border px-3 py-2 rounded"
+                  >
+                    <option value="Checked In">Checked In</option>
+                    <option value="Pre-Procedure">Pre-Procedure</option>
+                    <option value="In-progress">In-progress</option>
+                    <option value="Closing">Closing</option>
+                    <option value="Recovery">Recovery</option>
+                    <option value="Complete">Complete</option>
+                    <option value="Dismissal">Dismissal</option>
+                  </select>
+                </div>
+              )}
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+              <AlertDialogAction asChild>
+                <button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer px-4 py-2 rounded"
+                >
+                  {editMode ? "Update Patient" : "Add Patient"}
+                </button>
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
