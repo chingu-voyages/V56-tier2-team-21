@@ -5,11 +5,12 @@ import { AuthProvider } from './features/auth/AuthContext'
 import PrivateRoute from './features/auth/PrivateRoute'
 import PatientStatusBoard from './features/patientStatus/PatientStatusBoard'
 import Container from './features/container/Container'
+import AdminPage from './features/admin/AdminPage'
 import SurgeryDashboard from './features/dashboard/Dashboard'
 import Chatbot from './features/chat/components/chatbot'
 
 function App() {
-  const AdminPage = () => <div>Admin Page (Protected)</div>;
+
   const GuestPage = () => <div>Guest Page (Protected)</div>;
 
   return (
