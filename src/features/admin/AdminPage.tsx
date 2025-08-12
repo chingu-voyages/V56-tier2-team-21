@@ -176,7 +176,7 @@ const AdminPage: React.FC = () => {
             <img src="/home.png" className="size-12 ml-4" />
             <span>HOME</span>
           </div>
-          <div
+          {/* <div
             className="flex items-center justify-center gap-2 cursor-pointer font-bold"
             onClick={() => navigate("/admin")}
           >
@@ -190,7 +190,7 @@ const AdminPage: React.FC = () => {
           >
             <img src='/patient-status.png' className="size-12 ml-4" />
             <span>Patient Status</span>
-          </div>
+          </div> */}
 
         </div>
       </div>
