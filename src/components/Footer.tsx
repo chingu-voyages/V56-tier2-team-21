@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <div className='h-14 w-full bottom-0 fixed text-white text-sm text-center flex justify-center items-center gap-4 px-4'>
+    <div className='h-14 w-full bottom-0 fixed text-sm text-center flex justify-center items-center gap-4 px-4'>
       <div className='flex items-center gap-1'>
         <span>Created by</span>
         <a href='https://github.com/elva329' target="_blank" rel="noopener noreferrer">@elva329</a>
