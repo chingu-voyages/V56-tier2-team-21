@@ -1,20 +1,39 @@
-// ...existing code...
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../../components/Header';
 import { useLocation } from 'react-router-dom';
 
-// Local storage key
 const STORAGE_KEY = 'patientStatusBoardData';
 
-export type PatientStatus = "Checked In" | "Pre-Procedure" | "In-progress" | "Closing" | "Recovery" | "Complete" | "Dismissal";
+export type PatientStatus =
+  | "Checked In"
+  | "Pre-Procedure"
+  | "In-progress"
+  | "Closing"
+  | "Recovery"
+  | "Complete"
+  | "Dismissal";
+
+// export interface Patient {
+//   id: string;
+//   number: string;
+//  name: string;
+//   status: PatientStatus;
+//   email?: string; // optional for admin-like layout
+// }
+
 export interface Patient {
-  id: string;
+  id?: string; // optional (admin doesn't create it)
   number: string;
-  name: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string; // keep for backward compatibility
   status: PatientStatus;
+  email?: string;
 }
 
-// Status color mapping
+
 const statusColors: Record<PatientStatus, string> = {
   'Checked In': 'bg-yellow-100 text-yellow-800',
   'Pre-Procedure': 'bg-blue-100 text-blue-800',
@@ -25,9 +44,8 @@ const statusColors: Record<PatientStatus, string> = {
   'Dismissal': 'bg-red-100 text-red-800',
 };
 
-
-const AUTO_REFRESH_INTERVAL = 10000; // 10 seconds
-const VISIBLE_ROWS = 5; // Number of rows visible at a time before cycling
+const AUTO_REFRESH_INTERVAL = 10000;
+const VISIBLE_ROWS = 7;
 
 const getPatientsFromStorage = (): Patient[] => {
   const data = localStorage.getItem(STORAGE_KEY);
@@ -56,16 +74,21 @@ const statusOptions: PatientStatus[] = [
   'Dismissal',
 ];
 
-function UpdateStatusDropdown({ patient, refreshBoard }: { patient: Patient; refreshBoard: () => void }) {
+function UpdateStatusDropdown({
+  patient,
+  refreshBoard
+}: {
+  patient: Patient;
+  refreshBoard: () => void;
+}) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selected, setSelected] = useState<PatientStatus>(patient.status);
-  const handleUpdate = () => setShowDropdown(true);
 
+  const handleUpdate = () => setShowDropdown(true);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value as PatientStatus;
     setSelected(newStatus);
-    // Update localStorage
     const patients = getPatientsFromStorage();
     const idx = patients.findIndex(p => p.id === patient.id);
     if (idx > -1) {
@@ -75,6 +98,7 @@ function UpdateStatusDropdown({ patient, refreshBoard }: { patient: Patient; ref
       setShowDropdown(false);
     }
   };
+
   return showDropdown ? (
     <select
       className="ml-2 px-2 py-1 rounded border text-xs"
@@ -82,7 +106,9 @@ function UpdateStatusDropdown({ patient, refreshBoard }: { patient: Patient; ref
       onChange={handleChange}
     >
       {statusOptions.map(opt => (
-        <option key={opt} value={opt}>{opt}</option>
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
       ))}
     </select>
   ) : (
@@ -95,9 +121,13 @@ function UpdateStatusDropdown({ patient, refreshBoard }: { patient: Patient; ref
   );
 }
 
-const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({ isGuest, patients: propPatients }) => {
-  // If propPatients is provided (search result), use it and do not overwrite on refresh
-  const [patients, setPatients] = useState<Patient[]>(propPatients ?? getPatientsFromStorage());
+const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({
+  isGuest,
+  patients: propPatients
+}) => {
+  const [patients, setPatients] = useState<Patient[]>(
+    propPatients ?? getPatientsFromStorage()
+  );
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [startIdx, setStartIdx] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -105,7 +135,7 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({ isGuest, patien
 
   const location = useLocation();
   const currentPath = location.pathname.replace('/', '');
-  // Load from localStorage on mount (only if not using propPatients)
+
   useEffect(() => {
     if (!propPatients) {
       setPatients(getPatientsFromStorage());
@@ -114,13 +144,11 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({ isGuest, patien
     }
   }, [propPatients]);
 
-  // Auto-refresh logic: only refresh from storage if not showing search results
   useEffect(() => {
     if (!propPatients) {
       intervalRef.current = setInterval(() => {
         setPatients(getPatientsFromStorage());
         setLastUpdated(new Date().toLocaleTimeString());
-        // Cycle rows if more than visible
         if (patients.length > VISIBLE_ROWS) {
           setStartIdx(prev => (prev + VISIBLE_ROWS) % patients.length);
         }
@@ -131,28 +159,29 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({ isGuest, patien
     }
   }, [patients.length, propPatients]);
 
-  // Auto-scroll for guest view
   useEffect(() => {
     if (!isGuest) return;
     const container = scrollRef.current;
     if (!container) return;
-    let scrollAmount = 1;
+    const scrollAmount = 1;
     let interval: NodeJS.Timeout;
     function startScroll() {
       interval = setInterval(() => {
         if (!container) return;
-        if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+        if (
+          container.scrollTop + container.clientHeight >=
+          container.scrollHeight
+        ) {
           container.scrollTop = 0;
         } else {
           container.scrollTop += scrollAmount;
         }
-      }, 40); // Adjust speed as needed
+      }, 40);
     }
     startScroll();
     return () => clearInterval(interval);
   }, [isGuest, patients.length]);
 
-  // Only refresh from storage if not showing search results
   const handleRefresh = () => {
     if (!propPatients) {
       setPatients(getPatientsFromStorage());
@@ -161,59 +190,91 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({ isGuest, patien
     }
   };
 
-  // Show only a slice if too many patients
-  const visiblePatients = patients.length > VISIBLE_ROWS
-    ? patients.slice(startIdx, startIdx + VISIBLE_ROWS)
-    : patients;
+  const visiblePatients =
+    patients.length > VISIBLE_ROWS
+      ? patients.slice(startIdx, startIdx + VISIBLE_ROWS)
+      : patients;
 
   return (
-    <div className={`${isGuest ? 'fixed inset-0 bg-white' : 'max-w-2xl mx-auto mt-8 p-4 bg-white rounded-xl shadow-md mb-24'}`}>
-      {currentPath !== 'surgery-team' && <div className='mb-10'><Header /></div>}
-      <div className={`${isGuest ? 'h-full flex flex-col' : ''}`}>
-        <div>
-          {!isGuest && !propPatients && (
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-              onClick={handleRefresh}
-            >
-              Refresh
-            </button>
-          )}
+    <div
+      className={`${
+        isGuest
+          ? 'fixed inset-0 bg-white'
+          : 'max-w-7xl mx-auto mt-8 p-4 bg-white rounded-xl shadow-md mb-24'
+      }`}
+    >
+      {currentPath !== 'surgery-team' && (
+        <div className="mb-10">
+          <Header />
         </div>
-        <div className="mb-2 text-sm text-gray-500 px-5">Latest updated at {lastUpdated}</div>
+      )}
+
+      <div className={`${isGuest ? 'h-full flex flex-col' : ''}`}>
+        {!isGuest && !propPatients && (
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition mb-4"
+            onClick={handleRefresh}
+          >
+            Refresh
+          </button>
+        )}
+
+        <div className="mb-2 text-sm text-gray-500 px-5">
+          Latest updated at {lastUpdated}
+        </div>
+
         <div
           className={`${isGuest ? 'flex-1 overflow-hidden p-6' : 'overflow-x-auto max-h-80'}`}
           ref={isGuest ? scrollRef : undefined}
           style={isGuest ? { maxHeight: '100%', height: '100%' } : {}}
         >
-          <table className={`${isGuest ? 'w-full text-lg' : 'min-w-full'} border`}>
+          {/* Admin-style table layout */}
+          <table className="w-full table-auto border border-gray-200 text-sm">
             <thead>
-              <tr className="bg-gray-100">
-                <th className={`${isGuest ? 'px-6 py-4' : 'px-4 py-2'} text-left`}>Patient #</th>
-                <th className={`${isGuest ? 'px-6 py-4' : 'px-4 py-2'} text-left`}>Name</th>
-                <th className={`${isGuest ? 'px-6 py-4' : 'px-4 py-2'} text-left`}>Status</th>
+              <tr className="bg-blue-50 text-gray-700">
+                <th className="border px-3 py-2">#</th>
+                <th className="border px-3 py-2">Firstname</th>
+                <th className="border px-3 py-2">LastName</th>
+                <th className="border px-3 py-2">Email</th>
+                                <th className="border px-3 py-2">Status</th>
+
               </tr>
             </thead>
             <tbody>
-              {visiblePatients.map((patient) => (
-                <tr key={patient.id} className="border-b">
-                  <td className={`${isGuest ? 'px-6 py-4' : 'px-4 py-2'} font-mono`}>{patient.number}</td>
-                  <td className={`${isGuest ? 'px-6 py-4' : 'px-4 py-2'}`}>{patient.name}</td>
-                  <td className={`${isGuest ? 'px-6 py-4' : 'px-4 py-2'} flex items-center gap-2`}>
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColors[patient.status] || 'bg-gray-100'}`}>
-                      {patient.status}
+              {visiblePatients.map((p, index) => (
+                <tr key={p.id || index} className="even:bg-gray-50">
+                  <td className="border px-3 py-2">{startIdx + index + 1}</td>
+                
+                  <td className="border px-3 py-2">{p.firstName}</td>
+                                    <td className="border px-3 py-2">{p.lastName}</td>
+
+                  <td className="border px-3 py-2">{p.email || 'N/A'}</td>
+                  <td className="border px-3 py-2 flex items-center gap-2">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        statusColors[p.status] || 'bg-gray-100'
+                      }`}
+                    >
+                      {p.status}
                     </span>
-                    {/* Only show update for non-guests */}
                     {!isGuest && (
-                      <UpdateStatusDropdown patient={patient} refreshBoard={handleRefresh} />
+                      <UpdateStatusDropdown
+                        patient={p}
+                        refreshBoard={handleRefresh}
+                      />
                     )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
           {patients.length > VISIBLE_ROWS && !isGuest && (
-            <div className="text-xs text-gray-400 mt-2">Showing {startIdx + 1} - {Math.min(startIdx + VISIBLE_ROWS, patients.length)} of {patients.length} patients</div>
+            <div className="text-xs text-gray-400 mt-2">
+              Showing {startIdx + 1} -{' '}
+              {Math.min(startIdx + VISIBLE_ROWS, patients.length)} of{' '}
+              {patients.length} patients
+            </div>
           )}
         </div>
       </div>
@@ -222,3 +283,4 @@ const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({ isGuest, patien
 };
 
 export default PatientStatusBoard;
+
