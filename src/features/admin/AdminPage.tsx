@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +12,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog"
 
 interface Patient {
   firstName: string;
@@ -177,7 +176,21 @@ const AdminPage: React.FC = () => {
             <img src="/home.png" className="size-12 ml-4" />
             <span>HOME</span>
           </div>
-        
+          {/* <div
+            className="flex items-center justify-center gap-2 cursor-pointer font-bold"
+            onClick={() => navigate("/admin")}
+          >
+            <img src='/patient-info.png' className="size-12 ml-4" />
+            <span>Patient Information</span>
+          </div>
+
+          <div
+            className="flex items-center justify-center gap-2 cursor-pointer font-bold"
+            onClick={() => navigate("/status")}
+          >
+            <img src='/patient-status.png' className="size-12 ml-4" />
+            <span>Patient Status</span>
+          </div> */}
 
         </div>
       </div>

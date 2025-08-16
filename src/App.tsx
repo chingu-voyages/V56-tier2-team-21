@@ -34,9 +34,10 @@ function App() {
             }
           />
           <Route path="/status" element={<PatientStatusBoard isGuest={true} />} />
-          <Route path="/surgery-team" element={<PatientStatusPage />} />
+          <Route path="/surgery-team" element={<SurgeryDashboard />} />
         </Routes>
         <Footer />
+        <Chatbot />
       </Router>
     </AuthProvider>
     //  <AuthProvider>
