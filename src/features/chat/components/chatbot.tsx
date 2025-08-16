@@ -1,9 +1,10 @@
+
+
 import ChatbotIcon from '@/components/ChatbotIcon';
 import Chatform from '@/components/Chatform';
 import ChatMessage from '@/components/ChatMessage';
 import { useRef, useState, useEffect } from 'react';
 import { hospitalInfo } from '@/components/hosptalInfo';
-// import { MessageCircle } from 'lucide-react';
 
 type ChatMessageType = {
   role: 'user' | 'model';
@@ -74,58 +75,63 @@ function Chatbot() {
   }, [chatHistory]);
 
   return (
-   
-    <div className={`fixed bottom-4 right-9 z-50 ${showChatbot ? '' : ''}`}>
-  {/* Toggle Button */}
-  <button
- 
-    onClick={() => setshowChatbot((prev) => !prev)}
-    className="bg-white hover:bg-violet-400 rounded-full p-3 shadow-md"
-  >
-    <img src="bot.png" alt="Chatbot" className="w-8 h-8" />
-  </button>
+    <div className="fixed bottom-4 right-9 z-50">
+      {/* Toggle Button - show only when chatbot is closed */}
+      {!showChatbot && (
+        <button
+          onClick={() => setshowChatbot(true)}
+          className="bg-white hover:bg-violet-400 rounded-full p-3 shadow-md"
+        >
+          <img src="bot.png" alt="Chatbot" className="w-8 h-8" />
+        </button>
+      )}
 
-  {/* Chatbot Popup */}
-  <div className={`mt-4 bg-white shadow-lg rounded-xl flex flex-col w-[350px] max-h-[80vh] ${showChatbot ? 'block' : 'hidden'}`}>
-    
-    {/* Header */}
-    <div className="bg-violet-900 text-white flex items-center justify-between px-2 py-1 rounded-t-xl">
-      <div className="flex items-center gap-2">
-        <ChatbotIcon />
-      </div>
-      <button onClick={() => setshowChatbot(false)} className="text-white text-4xl">×</button>
+      {/* Chatbot Window */}
+      {showChatbot && (
+        <div className="mt-4 bg-white shadow-lg rounded-xl flex flex-col w-[330px] h-[60vh] max-h-[90vh] animate-fade-in">
+          {/* Header */}
+          <div className="bg-violet-900 text-white flex items-center justify-between px-2 py-1 rounded-t-xl">
+            <div className="flex items-center gap-2">
+              <ChatbotIcon />
+            </div>
+            <button
+              onClick={() => setshowChatbot(false)}
+              className="text-white text-4xl"
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Chat Body */}
+          <div
+            ref={chatBodyRef}
+            className="flex-1 overflow-y-auto px-4 py-2 bg-gray-100 space-y-2 scroll-smooth"
+          >
+            <div className="flex items-start gap-2">
+              <ChatbotIcon />
+              <p className="bg-white p-3 rounded-lg shadow text-sm text-gray-800">
+                Hey there 👋<br />
+                How can I help you today?
+              </p>
+            </div>
+
+            {chatHistory.map((chat, index) => (
+              <ChatMessage key={index} chat={chat} />
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t px-4 py-3 bg-white">
+            <Chatform
+              chatHistory={chatHistory}
+              setchatHistory={setchatHistory}
+              generateBotResponse={generateBotResponse}
+            />
+          </div>
+        </div>
+      )}
     </div>
-
-    {/* Chat Body */}
-    <div
-      ref={chatBodyRef}
-      className="flex-1 overflow-y-auto px-4 py-2 bg-gray-100 space-y-2 scroll-smooth"
-    >
-      <div className="flex items-start gap-2">
-        <ChatbotIcon />
-        <p className="bg-white p-3 rounded-lg shadow text-sm text-gray-800">
-          Hey there 👋<br />
-          How can I help you today?
-        </p>
-      </div>
-
-      {chatHistory.map((chat, index) => (
-        <ChatMessage key={index} chat={chat} />
-      ))}
-    </div>
-
-    {/* Footer */}
-    <div className="border-t px-4 py-3 bg-white">
-      <Chatform
-        chatHistory={chatHistory}
-        setchatHistory={setchatHistory}
-        generateBotResponse={generateBotResponse}
-      />
-    </div>
-  </div>
-</div>
-
   );
 }
 
-export default Chatbot
+export default Chatbot;
