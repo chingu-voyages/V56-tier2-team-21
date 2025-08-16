@@ -5,16 +5,16 @@ import { AuthProvider } from './features/auth/AuthContext'
 import PrivateRoute from './features/auth/PrivateRoute'
 import PatientStatusBoard from './features/patientStatus/PatientStatusBoard'
 import Container from './features/container/Container'
-import AdminPage from './features/admin/AdminPage'
-import SurgeryDashboard from './features/dashboard/Dashboard'
+
 import Chatbot from './features/chat/components/chatbot'
-
+import SurgeryDashboard from './features/dashboard/Dashboard'
+import AdminPage from './features/admin/AdminPage'
 function App() {
-
   const GuestPage = () => <div>Guest Page (Protected)</div>;
 
   return (
-    <AuthProvider>
+
+     <AuthProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Container />} />
@@ -39,7 +39,7 @@ function App() {
           <Route path="/surgery-team" element={<SurgeryDashboard />} />
         </Routes>
         <Footer />
-        <Chatbot />
+      <Chatbot />
       </Router>
     </AuthProvider>
   );

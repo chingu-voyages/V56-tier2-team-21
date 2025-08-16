@@ -1,12 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import { STORAGE_KEY, type PatientInfo, type PatientStatus } from '../../types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 
-interface PatientStatusBoardProps {
-  isGuest?: boolean;
-  patients?: PatientInfo[];
-  onUpdatePatient?: (updatedPatient: PatientInfo) => void;
+
+import React, { useState, useEffect, useRef } from 'react';
+import Header from '../../components/Header';
+import { useLocation } from 'react-router-dom';
+
+const STORAGE_KEY = 'patientStatusBoardData';
+
+export type PatientStatus =
+  | "Checked In"
+  | "Pre-Procedure"
+  | "In-progress"
+  | "Closing"
+  | "Recovery"
+  | "Complete"
+  | "Dismissal";
+
+// export interface Patient {
+//   id: string;
+//   number: string;
+//  name: string;
+//   status: PatientStatus;
+//   email?: string; // optional for admin-like layout
+// }
+
+export interface Patient {
+  id?: string; // optional (admin doesn't create it)
+  number: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string; // keep for backward compatibility
+  status: PatientStatus;
+  email?: string;
 }
+
 
 const statusColors: Record<PatientStatus, string> = {
   'Checked In': 'bg-yellow-100 text-yellow-800',
@@ -18,6 +44,26 @@ const statusColors: Record<PatientStatus, string> = {
   'Dismissal': 'bg-red-100 text-red-800',
 };
 
+const AUTO_REFRESH_INTERVAL = 10000;
+const VISIBLE_ROWS = 7;
+
+const getPatientsFromStorage = (): Patient[] => {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if (data) {
+    try {
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+interface PatientStatusBoardProps {
+  isGuest?: boolean;
+  patients?: Patient[];
+}
+
 const statusOptions: PatientStatus[] = [
   'Checked In',
   'Pre-Procedure',
@@ -28,185 +74,213 @@ const statusOptions: PatientStatus[] = [
   'Dismissal',
 ];
 
-const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({
-  isGuest,
-  patients = [],
-  onUpdatePatient,
-}) => {
-  // const [editingPatient, setEditingPatient] = useState<PatientInfo | null>(null);
-  const [allPatients, setAllPatients] = useState<PatientInfo[]>([]);
-  const renderedPatients = patients ? patients : allPatients
+function UpdateStatusDropdown({
+  patient,
+  refreshBoard
+}: {
+  patient: Patient;
+  refreshBoard: () => void;
+}) {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selected, setSelected] = useState<PatientStatus>(patient.status);
 
-  const handleStatusChange = (patient: PatientInfo, newStatus: PatientStatus) => {
-    const updatedPatient = { ...patient, status: newStatus };
-    onUpdatePatient && onUpdatePatient(updatedPatient);
+  const handleUpdate = () => setShowDropdown(true);
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStatus = e.target.value as PatientStatus;
+    setSelected(newStatus);
+    const patients = getPatientsFromStorage();
+    const idx = patients.findIndex(p => p.id === patient.id);
+    if (idx > -1) {
+      patients[idx].status = newStatus;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(patients));
+      refreshBoard();
+      setShowDropdown(false);
+    }
   };
 
-  // const handleEditSave = () => {
-  //   if (editingPatient) {
-  //     // Validate telephone is a number and not NaN
-  //     const tel = Number(editingPatient.telephone);
-  //     if (isNaN(tel)) {
-  //       alert('Telephone must be a valid number');
-  //       return;
-  //     }
+  return showDropdown ? (
+    <select
+      className="ml-2 px-2 py-1 rounded border text-xs"
+      value={selected}
+      onChange={handleChange}
+    >
+      {statusOptions.map(opt => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+  ) : (
+    <button
+      className="ml-2 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition"
+      onClick={handleUpdate}
+    >
+      Update
+    </button>
+  );
+}
 
-  //     onUpdatePatient && onUpdatePatient({ ...editingPatient, telephone: tel });
-  //     setEditingPatient(null);
-  //   }
-  // };
+const PatientStatusBoard: React.FC<PatientStatusBoardProps> = ({
+  isGuest,
+  patients: propPatients
+}) => {
+  const [patients, setPatients] = useState<Patient[]>(
+    propPatients ?? getPatientsFromStorage()
+  );
+  const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [startIdx, setStartIdx] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // Load patients from localStorage on mount
+  const location = useLocation();
+  const currentPath = location.pathname.replace('/', '');
+
   useEffect(() => {
-    const storedData = localStorage.getItem(STORAGE_KEY);
-    console.log('storedData', storedData);
-
-    if (storedData) {
-      try {
-        const patients: PatientInfo[] = JSON.parse(storedData);
-        setAllPatients(patients);
-      } catch (error) {
-        console.error('Failed to parse patient data from localStorage:', error);
-        // Do not overwrite with empty if failed
-      }
+    if (!propPatients) {
+      setPatients(getPatientsFromStorage());
+    } else {
+      setPatients(propPatients);
     }
-  }, []);
+  }, [propPatients]);
 
-  console.log('renderedPatients', renderedPatients)
+  useEffect(() => {
+    if (!propPatients) {
+      intervalRef.current = setInterval(() => {
+        setPatients(getPatientsFromStorage());
+        setLastUpdated(new Date().toLocaleTimeString());
+        if (patients.length > VISIBLE_ROWS) {
+          setStartIdx(prev => (prev + VISIBLE_ROWS) % patients.length);
+        }
+      }, AUTO_REFRESH_INTERVAL);
+      return () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      };
+    }
+  }, [patients.length, propPatients]);
+
+  useEffect(() => {
+    if (!isGuest) return;
+    const container = scrollRef.current;
+    if (!container) return;
+    const scrollAmount = 1;
+    let interval: NodeJS.Timeout;
+    function startScroll() {
+      interval = setInterval(() => {
+        if (!container) return;
+        if (
+          container.scrollTop + container.clientHeight >=
+          container.scrollHeight
+        ) {
+          container.scrollTop = 0;
+        } else {
+          container.scrollTop += scrollAmount;
+        }
+      }, 40);
+    }
+    startScroll();
+    return () => clearInterval(interval);
+  }, [isGuest, patients.length]);
+
+  const handleRefresh = () => {
+    if (!propPatients) {
+      setPatients(getPatientsFromStorage());
+      setLastUpdated(new Date().toLocaleTimeString());
+      setStartIdx(0);
+    }
+  };
+
+  const visiblePatients =
+    patients.length > VISIBLE_ROWS
+      ? patients.slice(startIdx, startIdx + VISIBLE_ROWS)
+      : patients;
+
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full border">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="px-4 py-2 text-left">Patient #</th>
-            <th className="px-4 py-2 text-left">Name</th>
-            <th className="px-4 py-2 text-left">Address</th>
-            <th className="px-4 py-2 text-left">Telephone</th>
-            <th className="px-4 py-2 text-left">Contact Email</th>
-            <th className="px-4 py-2 text-left">Status</th>
-            {/* <th className="px-4 py-2 text-left">Actions</th> */}
-          </tr>
-        </thead>
-        <tbody>
-          {renderedPatients.map((patient) => (
-            <tr key={patient.id} className="border-b">
-              <td className="px-4 py-2 font-mono">{patient.id}</td>
-              <td className="px-4 py-2">{patient.firstName} {patient.lastName}</td>
-              <td className="px-4 py-2">{patient.streetAddress},{patient.city},{patient.state}, {patient.country} </td>
-              <td className="px-4 py-2">{patient.telephone}</td>
-              <td className="px-4 py-2">{patient.contactEmail}</td>
-              <td className="px-4 py-2">
-                <Select
-                  value={patient.status}
-                  onValueChange={(value) => handleStatusChange(patient, value as PatientStatus)}
-                  disabled={isGuest}
-                >
-                  <SelectTrigger className={`px-2 py-1 rounded text-sm ${statusColors[patient.status as PatientStatus]}`}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {status}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </td>
-              {/* <td className="px-4 py-2">
-                {!isGuest && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button onClick={() => setEditingPatient(patient)}>Edit</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Edit Patient</AlertDialogTitle>
-                        <AlertDialogDescription asChild>
-                          <div className="flex flex-col gap-4">
-                            <Input
-                              value={editingPatient?.firstName || ''}
-                              onChange={(e) =>
-                                setEditingPatient({ ...editingPatient!, firstName: e.target.value })
-                              }
-                              placeholder="First Name"
-                            />
-                            <Input
-                              value={editingPatient?.lastName || ''}
-                              onChange={(e) =>
-                                setEditingPatient({ ...editingPatient!, lastName: e.target.value })
-                              }
-                              placeholder="Last Name"
-                            />
-                            <Input
-                              value={editingPatient?.streetAddress || ''}
-                              onChange={(e) =>
-                                setEditingPatient({ ...editingPatient!, streetAddress: e.target.value })
-                              }
-                              placeholder="Street Address"
-                            />
-                            <Input
-                              value={editingPatient?.city || ''}
-                              onChange={(e) =>
-                                setEditingPatient({ ...editingPatient!, city: e.target.value })
-                              }
-                              placeholder="City"
-                            />
-                            <Input
-                              value={editingPatient?.state || ''}
-                              onChange={(e) =>
-                                setEditingPatient({ ...editingPatient!, state: e.target.value })
-                              }
-                              placeholder="State/Province/Region"
-                            />
-                            <Input
-                              type="number"
-                              value={editingPatient?.telephone.toString() || ''}
-                              onChange={(e) =>
-                                setEditingPatient({
-                                  ...editingPatient!,
-                                  telephone: parseInt(e.target.value, 10) || 0,
-                                })
-                              }
-                              placeholder="Telephone"
-                            />
-                            <Input
-                              value={editingPatient?.contactEmail || ''}
-                              onChange={(e) =>
-                                setEditingPatient({ ...editingPatient!, contactEmail: e.target.value })
-                              }
-                              placeholder="Contact Email"
-                            />
-                            <select
-                              className="px-2 py-1 rounded text-sm"
-                              value={editingPatient?.status}
-                              onChange={(e) =>
-                                setEditingPatient({ ...editingPatient!, status: e.target.value as PatientStatus })
-                              }
-                            >
-                              {statusOptions.map((status) => (
-                                <option key={status} value={status}>
-                                  {status}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setEditingPatient(null)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleEditSave}>Save</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
-              </td> */}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div
+      className={`${
+        isGuest
+          ? 'fixed inset-0 bg-white'
+          : 'max-w-7xl mx-auto mt-8 p-4 bg-white rounded-xl shadow-md mb-24'
+      }`}
+    >
+      {currentPath !== 'surgery-team' && (
+        <div className="mb-10">
+          <Header />
+        </div>
+      )}
+
+      <div className={`${isGuest ? 'h-full flex flex-col' : ''}`}>
+        {!isGuest && !propPatients && (
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition mb-4"
+            onClick={handleRefresh}
+          >
+            Refresh
+          </button>
+        )}
+
+        <div className="mb-2 text-sm text-gray-500 px-5">
+          Latest updated at {lastUpdated}
+        </div>
+
+        <div
+          className={`${isGuest ? 'flex-1 overflow-hidden p-6' : 'overflow-x-auto max-h-80'}`}
+          ref={isGuest ? scrollRef : undefined}
+          style={isGuest ? { maxHeight: '100%', height: '100%' } : {}}
+        >
+          {/* Admin-style table layout */}
+          <table className="w-full table-auto border border-gray-200 text-sm">
+            <thead>
+              <tr className="bg-blue-50 text-gray-700">
+                <th className="border px-3 py-2">#</th>
+                <th className="border px-3 py-2">Firstname</th>
+                <th className="border px-3 py-2">LastName</th>
+                <th className="border px-3 py-2">Email</th>
+                                <th className="border px-3 py-2">Status</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              {visiblePatients.map((p, index) => (
+                <tr key={p.id || index} className="even:bg-gray-50">
+                  <td className="border px-3 py-2">{startIdx + index + 1}</td>
+                
+                  <td className="border px-3 py-2">{p.firstName}</td>
+                                    <td className="border px-3 py-2">{p.lastName}</td>
+
+                  <td className="border px-3 py-2">{p.email || 'N/A'}</td>
+                  <td className="border px-3 py-2 flex items-center gap-2">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        statusColors[p.status] || 'bg-gray-100'
+                      }`}
+                    >
+                      {p.status}
+                    </span>
+                    {!isGuest && (
+                      <UpdateStatusDropdown
+                        patient={p}
+                        refreshBoard={handleRefresh}
+                      />
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {patients.length > VISIBLE_ROWS && !isGuest && (
+            <div className="text-xs text-gray-400 mt-2">
+              Showing {startIdx + 1} -{' '}
+              {Math.min(startIdx + VISIBLE_ROWS, patients.length)} of{' '}
+              {patients.length} patients
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
 
 export default PatientStatusBoard;
+
